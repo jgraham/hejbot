@@ -1,0 +1,86 @@
+# Choose a reviewer for the PR
+def main(config, pr, data):
+    if not (owner == 'rust-lang' or (owner == 'nrc' and repo == 'highfive')):
+        return 'test_user_selection_ignore_this'
+
+    # Get JSON data on reviewers.
+    dirs = config.get('dirs', {})
+    groups = config['groups']
+
+    # fill in the default groups, ensuring that overwriting is an
+    # error.
+    global_ = _load_json_file('_global.json')
+    for name, people in global_['groups'].iteritems():
+        assert name not in groups, "group %s overlaps with _global.json" % name
+        groups[name] = people
+
+
+    most_changed = None
+    # If there's directories with specially assigned groups/users
+    # inspect the diff to find the directory (under src) with the most
+    # additions
+    if dirs:
+        counts = {}
+        cur_dir = None
+        for line in diff.split('\n'):
+            if line.startswith("diff --git "):
+                # update cur_dir
+                cur_dir = None
+                start = line.find(" b/src/") + len(" b/src/")
+                if start == -1:
+                    continue
+                end = line.find("/", start)
+                if end == -1:
+                    continue
+
+                cur_dir = line[start:end]
+
+                # A few heuristics to get better reviewers
+                if cur_dir.startswith('librustc'):
+                    cur_dir = 'librustc'
+                if cur_dir == 'test':
+                    cur_dir = None
+                if cur_dir and cur_dir not in counts:
+                    counts[cur_dir] = 0
+                continue
+
+            if cur_dir and (not line.startswith('+++')) and line.startswith('+'):
+                counts[cur_dir] += 1
+
+        # Find the largest count.
+        most_changes = 0
+        for dir, changes in counts.iteritems():
+            if changes > most_changes:
+                most_changes = changes
+                most_changed = dir
+
+    # lookup that directory in the json file to find the potential reviewers
+    potential = groups['all']
+    if most_changed and most_changed in dirs:
+        potential.extend(dirs[most_changed])
+
+
+    # expand the reviewers list by group
+    reviewers = []
+    seen = {"all"}
+    while potential:
+        p = potential.pop()
+        if p.startswith('@'):
+            # remove the '@' prefix from each username
+            reviewers.append(p[1:])
+        elif p in groups:
+            # avoid infinite loops
+            assert p not in seen, "group %s refers to itself" % p
+            seen.add(p)
+            # we allow groups in groups, so they need to be queued to be resolved
+            potential.extend(groups[p])
+
+    if exclude in reviewers:
+        reviewers.remove(exclude)
+
+    if reviewers:
+        random.seed()
+        return random.choice(reviewers)
+    else:
+        # no eligible reviewer found
+        return None

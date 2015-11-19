@@ -2,11 +2,10 @@
 
 from distutils.core import setup
 
-setup(name='highfive',
+setup(name='hejbot',
       version='0.1',
-      description='GitHub hooks to provide an encouraging atmosphere for new contributors',
-      author='Rust Community',
-      author_email='no-idea@no-server.no-suffix',
-      url='https://github.com/nick29581/highfive',
-      packages=['highfive'],
+      description='Pluggable GitHub bot for handling PRs',
+      author='James Graham',
+      author_email='james@hoppipolla.co.uk',
+      packages=['hejbot'],
 )

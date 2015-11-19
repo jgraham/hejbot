@@ -1,0 +1,22 @@
+{
+    "commands": {
+        "pull_request": [[{"action": "opened"}, ["greeter", "stats", "reviewers.single"]]]
+    },
+
+    "plugins": {
+        "reviewers": {
+            "groups": {
+                "all": ["@someone"],
+                "group1": ["@anotheruser"]
+            },
+            "reviewers": {
+                "/": ["all"],
+                "/path": ["group1"]
+            },
+            "watchers": {}
+        },
+        "greeter": {
+            "welcome_message": "Thanks for the pull request, and welcome!"
+        }
+    }
+}
