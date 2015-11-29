@@ -134,7 +134,7 @@ def single(config, event, data):
     def message_func(reviewers, watchers):
         all_cc = reviewers | watchers
 
-        reviewer = random.choice(reviewers)
+        reviewer = random.choice(list(reviewers))
         message = """The following reviewer was randomly selected for this PR: %s""" % (reviewer,)
 
         all_cc.remove(reviewer)
