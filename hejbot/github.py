@@ -60,7 +60,8 @@ class GitHub(object):
             else:
                 return resp.headers, body
         else:
-            raise GitHubError(resp.status_code, resp.json())
+            print >> sys.stderr, "Request failed %s %s %s %s" % (method, url, resp.status_code, resp.text)
+            raise GitHubError(resp.status_code, resp.text)
 
     def _get_next(self, link):
         urls = link.split(",");

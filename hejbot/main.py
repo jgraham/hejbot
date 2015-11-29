@@ -49,6 +49,8 @@ def event_from_request(gh):
     cls_dict = {
         "pull_request": github.PullRequestEvent
     }
+    if event_name not in cls_dict:
+        return None, event_name, None
     repo = gh.repo(*(event["repository"]["full_name"].split("/")))
     return repo, event_name, cls_dict[event_name](repo, event)
 
@@ -89,6 +91,8 @@ def handle_event():
     gh = github.GitHub(app.config["GITHUB_CREDENTIALS"]["TOKEN"])
 
     repo, event_name, event = event_from_request(gh)
+    if event is None:
+        return "Nothing to do for event %s" % event_name
     data = Data(repo)
 
     config = app.config["REPOS"]["%s/%s" % (repo.owner.login, repo.name)]
